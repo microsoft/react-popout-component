@@ -7,6 +7,7 @@ export interface PopoutProps {
     onClose?: () => void;
     children?: any;
     options?: Partial<WindowFeaturesOptions>;
+    html?: string;
 }
 
 export interface WindowFeaturesOptions {
@@ -30,6 +31,10 @@ export default class Popout extends React.Component<PopoutProps, {}> {
     private renderChildWindow: () => void;
 
     private initializeChildWindow(id: string, child: Window) {
+        if (this.props.html) {
+            child.document.write(this.props.html);
+        }
+
         // Create a container element
         const container = child.document.createElement('div');
         container.id = id;

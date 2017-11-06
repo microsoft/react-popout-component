@@ -64,6 +64,7 @@ export interface PopoutProps {
     onClose?: () => void;
     children?: any;
     options?: Partial<WindowFeaturesOptions>;
+    html?: string;
 }
 ```
 

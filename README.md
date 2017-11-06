@@ -1,3 +1,88 @@
+# React Popout Component
+
+This is a React component designed for React 16 with complete Typescript support.
+
+# Features
+
+1. This is developed along side with the React 16 fix to allow mounting across frames *even for Edge and IE* browsers
+2. Typescript support for all the options (especially hard to remember window features)
+3. Reflects style-loader injected styles from the main window to the children window
+
+# Installation
+
+```
+npm install react-popout-component
+```
+
+or
+
+```
+yarn add react-popout-component
+```
+
+# Usage
+
+```
+import * as React from 'react';
+import PopOut from 'react-popout-component';
+
+export default class App extends React.Component<any, any> {
+    constructor(props: any) {
+        super(props);
+        this.state = {showPopout: false};
+    }
+
+    onClick = () => {
+        this.setState({showPopout: true});
+    }
+
+    render() {
+        return (
+            <div>
+                <h1>Now you too have the power to POP OUT</h1>
+                <button onClick={this.onClick}>POP IT OUT!</button>
+                {this.state.showPopout && (
+                    <PopOut>
+                        <div>You can put anything here!</div>
+                    </PopOut>
+                )}
+            </div>
+        );
+    }
+}
+
+```
+
+# API
+
+PopOut Component has the following props:
+
+```
+export interface PopoutProps {
+    hidden?: boolean;
+    name?: string;
+    onClose?: () => void;
+    children?: any;
+    options?: Partial<WindowFeaturesOptions>;
+}
+```
+
+The `options` prop is of the following type:
+
+```
+export interface WindowFeaturesOptions {
+    left: number;
+    top: number;
+    height: number;
+    width: number;
+    menubar: boolean;
+    toolbar: boolean;
+    location: boolean;
+    status: boolean;
+    resizable: boolean;
+    scrollbars: boolean;
+}
+```
 
 # Contributing
 

@@ -1,3 +1,7 @@
 h1 {
     font-family: 'Comic Sans MS';
 }
+
+body {
+    min-width: 1000px;
+}

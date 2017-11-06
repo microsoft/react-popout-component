@@ -1,7 +1,7 @@
 import * as React from 'react';
 import Popout from '..';
 
-import './MyPopout.css';
+const styles = require('./MyPopout.css');
 
 export default class MyPopout extends React.Component<any, any> {
     constructor(props: any) {
@@ -15,6 +15,7 @@ export default class MyPopout extends React.Component<any, any> {
         return (
             <Popout
                 hidden={this.props.hidden}
+                html={`<!DOCTYPE html><html dir='ltr'><body class='${styles.popout}'></body></html>`}
                 onClose={() => this.props.onClose(this.props.name)}
                 options={{
                     resizable: true,

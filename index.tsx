@@ -23,14 +23,35 @@ export interface WindowFeaturesOptions {
     scrollbars: boolean;
 }
 
+const UNIQUE_NAME = '__$$REACT_POPOUT_COMPONENT$$__';
+const popouts: { [id: string]: Popout } = {};
+
 export default class Popout extends React.Component<PopoutProps, {}> {
     private child: Window | null;
 
     private id: string;
 
-    private renderChildWindow: () => void;
+    //private renderChildWindow: () => void;
+    private container: HTMLElement;
+
+    private setupCleanupCallbacks() {
+        // Close the popout if main window is closed.
+        window.addEventListener('unload', e => this.closeChildWindowIfOpened());
+
+        if (!(window as any)[UNIQUE_NAME]) {
+            (window as any)[UNIQUE_NAME] = {
+                onChildClose: (id: string) => {
+                    if (popouts[id].props.onClose) {
+                        popouts[id].props.onClose!();
+                    }
+                },
+            };
+        }
+    }
 
     private initializeChildWindow(id: string, child: Window) {
+        popouts[id] = this;
+
         if (this.props.html) {
             child.document.write(this.props.html);
         }
@@ -45,9 +66,11 @@ export default class Popout extends React.Component<PopoutProps, {}> {
         });
 
         child.document.body.appendChild(container);
+        const unloadScriptContainer = child.document.createElement('script');
+        unloadScriptContainer.innerHTML = `window.onbeforeunload = function(e) { window.opener.${UNIQUE_NAME}.onChildClose.call(window.opener, '${id}'); }`;
+        child.document.body.appendChild(unloadScriptContainer);
 
-        // Close the popout if main window is closed.
-        window.addEventListener('unload', e => this.closeChildWindow());
+        this.setupCleanupCallbacks();
 
         // Add style observer
         const observer = new MutationObserver(mutations => {
@@ -78,16 +101,10 @@ export default class Popout extends React.Component<PopoutProps, {}> {
         this.child = window.open('about:blank', name, options);
         this.id = `__${name}_container__`;
 
-        const container = this.initializeChildWindow(this.id, this.child!);
-
-        this.renderChildWindow = () => {
-            ReactDOM.render(this.props.hidden ? null : this.props.children as any, container);
-        };
-
-        this.renderChildWindow();
+        this.container = this.initializeChildWindow(this.id, this.child!);
     };
 
-    private closeChildWindow = () => {
+    private closeChildWindowIfOpened = () => {
         if (isChildWindowOpened(this.child)) {
             this.child!.close();
 
@@ -105,23 +122,20 @@ export default class Popout extends React.Component<PopoutProps, {}> {
     }
 
     componentWillUnmount() {
-        this.closeChildWindow();
+        this.closeChildWindowIfOpened();
     }
 
-    componentDidUpdate() {
+    render() {
         if (!this.props.hidden) {
-            if (isChildWindowOpened(this.child)) {
-                this.renderChildWindow();
-            } else {
+            if (!isChildWindowOpened(this.child)) {
                 this.openChildWindow();
             }
-        } else {
-            this.closeChildWindow();
-        }
-    }
 
-    render(): null {
-        return null;
+            return ReactDOM.createPortal(this.props.children, this.container);
+        } else {
+            this.closeChildWindowIfOpened();
+            return null;
+        }
     }
 }
 
@@ -191,8 +205,6 @@ function generateWindowFeaturesString(optionsProp: Partial<WindowFeaturesOptions
     };
 
     options = { ...options, ...optionsProp };
-
-    console.log(options);
 
     return Object.getOwnPropertyNames(options)
         .map((key: keyof WindowFeaturesOptions) => `${key}=${valueOf(options[key])}`)

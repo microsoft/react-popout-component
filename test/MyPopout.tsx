@@ -1,5 +1,5 @@
 import * as React from 'react';
-import Popout from '..';
+import Popout from '../index';
 
 const styles = require('./MyPopout.css');
 

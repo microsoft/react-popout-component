@@ -1,6 +1,7 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import MyPopout from './MyPopout';
+import { insertPopoutStylesheetRule } from '../src/insertPopoutStylesheetRule';
 
 import './test.css';
 
@@ -22,8 +23,6 @@ class App extends React.Component<any, any> {
         open[id] = true;
 
         this.setState({ open });
-
-        console.log(this.state);
     }
 
     closeWindow(id: string) {
@@ -31,8 +30,6 @@ class App extends React.Component<any, any> {
         open[id] = false;
 
         this.setState({ open });
-
-        console.log(this.state);
     }
 
     onClose(id: string) {
@@ -40,8 +37,6 @@ class App extends React.Component<any, any> {
         open[id] = false;
 
         this.setState({ open: open });
-
-        console.log(this.state);
     }
 
     changeText() {
@@ -52,8 +47,6 @@ class App extends React.Component<any, any> {
                     .toString(12)
                     .slice(2),
         });
-
-        console.log(this.state);
     }
 
     render() {
@@ -70,8 +63,12 @@ class App extends React.Component<any, any> {
                             />
                         )}
 
-                        <button onClick={() => this.openWindow(name)}>Open {name}</button>
-                        <button onClick={() => this.closeWindow(name)}>Close {name}</button>
+                        <button onClick={() => this.openWindow(name)}>
+                            Open {name}
+                        </button>
+                        <button onClick={() => this.closeWindow(name)}>
+                            Close {name}
+                        </button>
                     </div>
                 ))}
 
@@ -80,5 +77,17 @@ class App extends React.Component<any, any> {
         );
     }
 }
+
+const style = document.createElement('style');
+
+style.setAttribute('data-merge-styles', 'true');
+style.type = 'text/css';
+
+document.head.appendChild(style);
+
+(window as any).insertRule = (rule: string) => {
+    (style.sheet as any).insertRule(rule, (style.sheet as any).cssRules.length);
+    insertPopoutStylesheetRule(rule);
+};
 
 ReactDOM.render(<App />, document.getElementById('test'));

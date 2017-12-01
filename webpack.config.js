@@ -2,6 +2,7 @@ const path = require('path');
 
 module.exports = {
     entry: './test/test.tsx',
+    devtool: 'eval',
     module: {
         rules: [
             {

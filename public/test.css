@@ -1,0 +1,10 @@
+html,
+body {
+    width: 100vh;
+    height: 100vh;
+}
+
+#test {
+    margin: 0 auto;
+    width: 600px;
+}

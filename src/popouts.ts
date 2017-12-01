@@ -1,4 +1,4 @@
-import Popout from './Popout';
+import { Popout } from './Popout';
 
 const popouts: { [id: string]: Popout } = {};
 

@@ -1,6 +1,6 @@
 # React Popout Component
 
-[![Build Status](https://travis-ci.org/Microsoft/react-popout-component.svg?branch=v1.0.0)](https://travis-ci.org/Microsoft/react-popout-component)
+[![Build Status](https://travis-ci.org/Microsoft/react-popout-component.svg?branch=v1.0.0)](https://travis-ci.org/Microsoft/react-popout-component) [![npm](https://img.shields.io/npm/v/react-popout-component.svg)](https://www.npmjs.com/package/react-popout-component)
 
 This is a React component designed for React 16 with complete Typescript support.
 

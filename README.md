@@ -1,6 +1,6 @@
 # React Popout Component
 
-[![Build Status](https://travis-ci.org/Microsoft/react-popout-component.svg?branch=v1.0.0)](https://travis-ci.org/Microsoft/react-popout-component)
+[![Build Status](https://travis-ci.org/Microsoft/react-popout-component.svg?branch=v1.0.0)](https://travis-ci.org/Microsoft/react-popout-component) [![npm](https://img.shields.io/npm/v/react-popout-component.svg)](https://www.npmjs.com/package/react-popout-component)
 
 This is a React component designed for React 16 with complete Typescript support.
 
@@ -26,7 +26,7 @@ yarn add react-popout-component
 
 ```
 import * as React from 'react';
-import PopOut from 'react-popout-component';
+import {Popout} from 'react-popout-component';
 
 export default class App extends React.Component<any, any> {
     constructor(props: any) {
@@ -44,9 +44,9 @@ export default class App extends React.Component<any, any> {
                 <h1>Now you too have the power to POP OUT</h1>
                 <button onClick={this.onClick}>POP IT OUT!</button>
                 {this.state.showPopout && (
-                    <PopOut>
+                    <Popout>
                         <div>You can put anything here!</div>
-                    </PopOut>
+                    </Popout>
                 )}
             </div>
         );
@@ -84,6 +84,26 @@ export interface WindowFeaturesOptions {
     status: boolean;
     resizable: boolean;
     scrollbars: boolean;
+}
+```
+
+# Injection Mode
+
+This component works well for both modes of style loading:
+1. Appending Style blocks (e.g. style-loader)
+2. Manual insertRule() into a CSSStyleSheet
+
+For the second case with insertRule(), since there is nothing that can observe the insert event, a callback must be registered when a
+rule is inserted. For an example usage with the Microsoft [Office Fabric](https://github.com/officedev/office-ui-fabric-react), 
+set it up as a global like so:
+
+```javascript
+import {insertPopoutStylesheetRule} from 'react-popout-component';
+
+window.FabricConfig = {
+    mergeStyles: {
+        onInsertRule: insertPopoutStylesheetRule
+    }
 }
 ```
 

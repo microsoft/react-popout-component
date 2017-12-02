@@ -1,2 +1,2 @@
-exports.default = require('./lib/Popout');
-exports.insertPopoutStylesheetRule = require('./lib/insertPopoutStylesheetRule');
+exports.Popout = require('./lib/Popout').Popout;
+exports.insertPopoutStylesheetRule = require('./lib/insertPopoutStylesheetRule').insertPopoutStylesheetRule;

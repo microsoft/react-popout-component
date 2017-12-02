@@ -32,13 +32,11 @@ export class Popout extends React.Component<PopoutProps, {}> {
     }
 
     private setupStyleElement(child: Window) {
-        if (!this.styleElement) {
-            this.styleElement = child.document.createElement('style');
-            this.styleElement.setAttribute('data-this-styles', 'true');
-            this.styleElement.type = 'text/css';
+        this.styleElement = child.document.createElement('style');
+        this.styleElement.setAttribute('data-this-styles', 'true');
+        this.styleElement.type = 'text/css';
 
-            child.document.head.appendChild(this.styleElement);
-        }
+        child.document.head.appendChild(this.styleElement);
 
         for (let i = document.styleSheets.length - 1; i >= 0; i--) {
             const styleSheet = document.styleSheets[i] as CSSStyleSheet;

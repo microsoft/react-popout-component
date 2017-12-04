@@ -60,15 +60,16 @@ class App extends React.Component<any, any> {
                                 name={name}
                                 message={this.state.message}
                                 onClose={() => this.onClose(name)}
+                                onBeforeUnload={evt => {
+                                    if (name == '0') {
+                                        return 'Are you sure?!';
+                                    }
+                                }}
                             />
                         )}
 
-                        <button onClick={() => this.openWindow(name)}>
-                            Open {name}
-                        </button>
-                        <button onClick={() => this.closeWindow(name)}>
-                            Close {name}
-                        </button>
+                        <button onClick={() => this.openWindow(name)}>Open {name}</button>
+                        <button onClick={() => this.closeWindow(name)}>Close {name}</button>
                     </div>
                 ))}
 

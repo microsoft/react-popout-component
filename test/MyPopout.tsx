@@ -1,9 +1,14 @@
 import * as React from 'react';
 import { Popout } from '../src/Popout';
+import { PopoutProps } from '../src/PopoutProps';
 
 const styles = require('./MyPopout.css');
 
-export default class MyPopout extends React.Component<any, any> {
+interface MyPopoutProps extends PopoutProps {
+    message: string;
+}
+
+export default class MyPopout extends React.Component<MyPopoutProps, any> {
     constructor(props: any) {
         super(props);
         this.state = { newStyle: false };
@@ -18,21 +23,16 @@ export default class MyPopout extends React.Component<any, any> {
                 html={`<!DOCTYPE html><html dir='ltr'><body class='${
                     styles.popout
                 }'></body></html>`}
-                onClose={() => this.props.onClose(this.props.name)}
+                onClose={this.props.onClose}
+                onBeforeUnload={this.props.onBeforeUnload}
                 options={{
                     resizable: true,
-                }}
-            >
+                }}>
                 <div>
                     <h1 className={className}>
-                        {this.props.message} {this.props.name}{' '}
-                        {this.state.newStyle ? 'new' : 'old'}
+                        {this.props.message} {this.props.name} {this.state.newStyle ? 'new' : 'old'}
                     </h1>
-                    <button
-                        onClick={() =>
-                            this.setState({ newStyle: !this.state.newStyle })
-                        }
-                    >
+                    <button onClick={() => this.setState({ newStyle: !this.state.newStyle })}>
                         Toggle Style
                     </button>
                 </div>

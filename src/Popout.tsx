@@ -27,6 +27,12 @@ export class Popout extends React.Component<PopoutProps, {}> {
                         popouts[id].props.onClose!();
                     }
                 },
+
+                onBeforeUnload: (id: string, evt: BeforeUnloadEvent) => {
+                    if (popouts[id].props.onBeforeUnload) {
+                        return popouts[id].props.onBeforeUnload!(evt);
+                    }
+                },
             };
         }
     }
@@ -40,11 +46,7 @@ export class Popout extends React.Component<PopoutProps, {}> {
 
         for (let i = document.styleSheets.length - 1; i >= 0; i--) {
             const styleSheet = document.styleSheets[i] as CSSStyleSheet;
-            for (
-                let ruleIndex = 0;
-                ruleIndex < styleSheet.cssRules.length;
-                ruleIndex++
-            ) {
+            for (let ruleIndex = 0; ruleIndex < styleSheet.cssRules.length; ruleIndex++) {
                 (this.styleElement!.sheet as CSSStyleSheet).insertRule(
                     styleSheet.cssRules[ruleIndex].cssText,
                     0
@@ -69,9 +71,30 @@ export class Popout extends React.Component<PopoutProps, {}> {
 
         child.document.body.appendChild(container);
         const unloadScriptContainer = child.document.createElement('script');
-        unloadScriptContainer.innerHTML = `window.onbeforeunload = function(e) { window.opener.${
-            UNIQUE_NAME
-        }.onChildClose.call(window.opener, '${id}'); }`;
+        unloadScriptContainer.innerHTML = `
+        window.__handlingBeforeUnload = false;
+        window.onbeforeunload = function(e) {
+            if (!window.__handlingBeforeUnload) {
+                window.__handlingBeforeUnload = true;
+                var result = window.opener.${UNIQUE_NAME}.onBeforeUnload.call(window, '${id}', e);
+
+                if (result) {
+                    e.returnValue = result;
+                    setTimeout(function() {
+                        window.__handlingBeforeUnload = false;
+                    }, 500);
+                    window.onunload = function() {
+                        window.opener.${UNIQUE_NAME}.onChildClose.call(window.opener, '${id}');
+                    };
+                    return result;
+                } else {
+                     window.opener.${UNIQUE_NAME}.onChildClose.call(window.opener, '${id}');
+                }
+            }
+        };
+
+        `;
+
         child.document.body.appendChild(unloadScriptContainer);
 
         this.setupCleanupCallbacks();

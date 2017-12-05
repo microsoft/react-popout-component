@@ -43,33 +43,48 @@ export class Popout extends React.Component<PopoutProps, {}> {
         this.styleElement.type = 'text/css';
 
         child.document.head.appendChild(this.styleElement);
-
-        for (let i = document.styleSheets.length - 1; i >= 0; i--) {
-            const styleSheet = document.styleSheets[i] as CSSStyleSheet;
-            for (let ruleIndex = 0; ruleIndex < styleSheet.cssRules.length; ruleIndex++) {
-                (this.styleElement!.sheet as CSSStyleSheet).insertRule(
-                    styleSheet.cssRules[ruleIndex].cssText,
-                    0
-                );
-            }
-        }
     }
 
     private initializeChildWindow(id: string, child: Window) {
         popouts[id] = this;
 
+        let container: HTMLDivElement;
+
         if (this.props.html) {
             child.document.write(this.props.html);
-        }
+            const head = child.document.head;
 
-        // Create a container element
-        const container = child.document.createElement('div');
-        container.id = id;
+            let cssText = '';
+
+            for (let i = window.document.styleSheets.length - 1; i >= 0; i--) {
+                const rules = (window.document.styleSheets[i] as CSSStyleSheet).cssRules;
+                for (let j = 0; j < rules.length; j++) {
+                    cssText += rules[j].cssText;
+                }
+            }
+
+            const style = child.document.createElement('style');
+            style.innerHTML = cssText;
+
+            head.appendChild(style);
+            container = child.document.createElement('div');
+            container.id = id;
+            child.document.body.appendChild(container);
+        } else {
+            let childHtml = '<!DOCTYPE html><html><head>';
+            for (let i = window.document.styleSheets.length - 1; i >= 0; i--) {
+                const cssText = (window.document.styleSheets[i] as CSSStyleSheet).cssText;
+                childHtml += `<style>${cssText}</style>`;
+            }
+            childHtml += `</head><body><div id="${id}"></div></body></html>`;
+            child.document.write(childHtml);
+            container = child.document.getElementById(id)! as HTMLDivElement;
+        }
 
         // Create a document with the styles of the parent window first
         this.setupStyleElement(child);
 
-        child.document.body.appendChild(container);
+        //child.document.body.appendChild(container);
         const unloadScriptContainer = child.document.createElement('script');
         unloadScriptContainer.innerHTML = `
         window.__handlingBeforeUnload = false;
@@ -80,19 +95,12 @@ export class Popout extends React.Component<PopoutProps, {}> {
 
                 if (result) {
                     e.returnValue = result;
-                    setTimeout(function() {
-                        window.__handlingBeforeUnload = false;
-                    }, 500);
-                    window.onunload = function() {
-                        window.opener.${UNIQUE_NAME}.onChildClose.call(window.opener, '${id}');
-                    };
                     return result;
                 } else {
                      window.opener.${UNIQUE_NAME}.onChildClose.call(window.opener, '${id}');
                 }
             }
         };
-
         `;
 
         child.document.body.appendChild(unloadScriptContainer);
@@ -187,7 +195,7 @@ function forEachStyleElement(
 
     for (let i = 0; i < nodeList.length; i++) {
         element = nodeList[i] as HTMLElement;
-        if (element.tagName == 'STYLE' || element.tagName == 'LINK') {
+        if (element.tagName == 'STYLE') {
             callback.call(scope, element, i);
         }
     }

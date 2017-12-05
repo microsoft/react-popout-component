@@ -5,7 +5,8 @@
     "main": "index.js",
     "scripts": {
         "start": "webpack-dev-server",
-        "build": "tsc -p tsconfig.build.json"
+        "build": "tsc -p tsconfig.build.json",
+        "watch": "tsc -w -p tsconfig.build.json"
     },
     "keywords": [],
     "author": "",

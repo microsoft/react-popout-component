@@ -2,7 +2,6 @@ const path = require('path');
 
 module.exports = {
     entry: './test/test.tsx',
-    devtool: 'eval',
     module: {
         rules: [
             {
@@ -23,5 +22,6 @@ module.exports = {
         filename: 'bundle.js',
         path: path.resolve(__dirname, 'test'),
         publicPath: 'test',
+        devtoolModuleFilenameTemplate: 'http://localhost:8080/[resource-path]',
     },
 };

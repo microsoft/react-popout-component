@@ -4,8 +4,8 @@ import { PopoutProps } from './PopoutProps';
 import { generateWindowFeaturesString } from './generateWindowFeaturesString';
 import { popouts } from './popouts';
 import { crossBrowserCloneNode } from './crossBrowserCloneNode';
-
-const UNIQUE_NAME = '__$$REACT_POPOUT_COMPONENT$$__';
+import * as globalContext from './globalContext';
+import './childWindowMonitor';
 
 export class Popout extends React.Component<PopoutProps, {}> {
     private id: string;
@@ -20,21 +20,20 @@ export class Popout extends React.Component<PopoutProps, {}> {
         // Close the popout if main window is closed.
         window.addEventListener('unload', e => this.closeChildWindowIfOpened());
 
-        if (!(window as any)[UNIQUE_NAME]) {
-            (window as any)[UNIQUE_NAME] = {
-                onChildClose: (id: string) => {
-                    if (popouts[id].props.onClose) {
-                        popouts[id].props.onClose!();
-                    }
-                },
+        globalContext.set('onChildClose', (id: string) => {
+            if (popouts[id].props.onClose) {
+                popouts[id].props.onClose!();
+            }
+        });
 
-                onBeforeUnload: (id: string, evt: BeforeUnloadEvent) => {
-                    if (popouts[id].props.onBeforeUnload) {
-                        return popouts[id].props.onBeforeUnload!(evt);
-                    }
-                },
-            };
-        }
+        globalContext.set(
+            'onBeforeUnload',
+            (id: string, evt: BeforeUnloadEvent) => {
+                if (popouts[id].props.onBeforeUnload) {
+                    return popouts[id].props.onBeforeUnload!(evt);
+                }
+            }
+        );
     }
 
     private setupStyleElement(child: Window) {
@@ -57,7 +56,8 @@ export class Popout extends React.Component<PopoutProps, {}> {
             let cssText = '';
 
             for (let i = window.document.styleSheets.length - 1; i >= 0; i--) {
-                const rules = (window.document.styleSheets[i] as CSSStyleSheet).cssRules;
+                const rules = (window.document.styleSheets[i] as CSSStyleSheet)
+                    .cssRules;
                 for (let j = 0; j < rules.length; j++) {
                     cssText += rules[j].cssText;
                 }
@@ -73,7 +73,9 @@ export class Popout extends React.Component<PopoutProps, {}> {
         } else {
             let childHtml = '<!DOCTYPE html><html><head>';
             for (let i = window.document.styleSheets.length - 1; i >= 0; i--) {
-                const cssText = (window.document.styleSheets[i] as CSSStyleSheet).cssText;
+                const cssText = (window.document.styleSheets[
+                    i
+                ] as CSSStyleSheet).cssText;
                 childHtml += `<style>${cssText}</style>`;
             }
             childHtml += `</head><body><div id="${id}"></div></body></html>`;
@@ -87,18 +89,23 @@ export class Popout extends React.Component<PopoutProps, {}> {
         //child.document.body.appendChild(container);
         const unloadScriptContainer = child.document.createElement('script');
         unloadScriptContainer.innerHTML = `
-        window.__handlingBeforeUnload = false;
+        
         window.onbeforeunload = function(e) {
-            if (!window.__handlingBeforeUnload) {
-                window.__handlingBeforeUnload = true;
-                var result = window.opener.${UNIQUE_NAME}.onBeforeUnload.call(window, '${id}', e);
+            var result = window.opener.${
+                globalContext.id
+            }.onBeforeUnload.call(window, '${id}', e);
 
-                if (result) {
-                    e.returnValue = result;
-                    return result;
-                } else {
-                     window.opener.${UNIQUE_NAME}.onChildClose.call(window.opener, '${id}');
-                }
+            if (result) {
+                window.opener.${
+                    globalContext.id
+                }.startMonitor.call(window.opener, '${id}');
+
+                e.returnValue = result;
+                return result;
+            } else {
+                window.opener.${
+                    globalContext.id
+                }.onChildClose.call(window.opener, '${id}');
             }
         };
         `;
@@ -165,7 +172,9 @@ export class Popout extends React.Component<PopoutProps, {}> {
                 this.openChildWindow();
             }
 
-            return ReactDOM.createPortal(this.props.children, this.container);
+            ReactDOM.render(this.props.children, this.container);
+
+            return null;
         } else {
             this.closeChildWindowIfOpened();
             return null;

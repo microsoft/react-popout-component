@@ -49,6 +49,10 @@ class App extends React.Component<any, any> {
         });
     }
 
+    componentDidCatch(error: Error, errorInfo: any) {
+        console.log(error, errorInfo);
+    }
+
     render() {
         return (
             <div>
@@ -68,8 +72,12 @@ class App extends React.Component<any, any> {
                             />
                         )}
 
-                        <button onClick={() => this.openWindow(name)}>Open {name}</button>
-                        <button onClick={() => this.closeWindow(name)}>Close {name}</button>
+                        <button onClick={() => this.openWindow(name)}>
+                            Open {name}
+                        </button>
+                        <button onClick={() => this.closeWindow(name)}>
+                            Close {name}
+                        </button>
                     </div>
                 ))}
 

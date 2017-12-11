@@ -26,14 +26,11 @@ export class Popout extends React.Component<PopoutProps, {}> {
             }
         });
 
-        globalContext.set(
-            'onBeforeUnload',
-            (id: string, evt: BeforeUnloadEvent) => {
-                if (popouts[id].props.onBeforeUnload) {
-                    return popouts[id].props.onBeforeUnload!(evt);
-                }
+        globalContext.set('onBeforeUnload', (id: string, evt: BeforeUnloadEvent) => {
+            if (popouts[id].props.onBeforeUnload) {
+                return popouts[id].props.onBeforeUnload!(evt);
             }
-        );
+        });
     }
 
     private setupStyleElement(child: Window) {
@@ -56,10 +53,12 @@ export class Popout extends React.Component<PopoutProps, {}> {
             let cssText = '';
 
             for (let i = window.document.styleSheets.length - 1; i >= 0; i--) {
-                const rules = (window.document.styleSheets[i] as CSSStyleSheet)
-                    .cssRules;
-                for (let j = 0; j < rules.length; j++) {
-                    cssText += rules[j].cssText;
+                const rules = (window.document.styleSheets[i] as CSSStyleSheet).cssRules;
+
+                if (rules) {
+                    for (let j = 0; j < rules.length; j++) {
+                        cssText += rules[j].cssText;
+                    }
                 }
             }
 
@@ -73,9 +72,7 @@ export class Popout extends React.Component<PopoutProps, {}> {
         } else {
             let childHtml = '<!DOCTYPE html><html><head>';
             for (let i = window.document.styleSheets.length - 1; i >= 0; i--) {
-                const cssText = (window.document.styleSheets[
-                    i
-                ] as CSSStyleSheet).cssText;
+                const cssText = (window.document.styleSheets[i] as CSSStyleSheet).cssText;
                 childHtml += `<style>${cssText}</style>`;
             }
             childHtml += `</head><body><div id="${id}"></div></body></html>`;
@@ -89,23 +86,17 @@ export class Popout extends React.Component<PopoutProps, {}> {
         //child.document.body.appendChild(container);
         const unloadScriptContainer = child.document.createElement('script');
         unloadScriptContainer.innerHTML = `
-        
+
         window.onbeforeunload = function(e) {
-            var result = window.opener.${
-                globalContext.id
-            }.onBeforeUnload.call(window, '${id}', e);
+            var result = window.opener.${globalContext.id}.onBeforeUnload.call(window, '${id}', e);
 
             if (result) {
-                window.opener.${
-                    globalContext.id
-                }.startMonitor.call(window.opener, '${id}');
+                window.opener.${globalContext.id}.startMonitor.call(window.opener, '${id}');
 
                 e.returnValue = result;
                 return result;
             } else {
-                window.opener.${
-                    globalContext.id
-                }.onChildClose.call(window.opener, '${id}');
+                window.opener.${globalContext.id}.onChildClose.call(window.opener, '${id}');
             }
         };
         `;

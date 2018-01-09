@@ -2,7 +2,8 @@
     "name": "react-popout-component",
     "version": "1.5.0",
     "description": "",
-    "main": "index.js",
+    "main": "lib/index.js",
+    "types": "lib/index.d.ts",
     "scripts": {
         "start": "webpack-dev-server",
         "build": "tsc -p tsconfig.build.json",

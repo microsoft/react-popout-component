@@ -1,4 +1,4 @@
-import { WindowFeaturesOptions } from './WindwoFeaturesOptions';
+import { WindowFeaturesOptions } from "./WindwoFeaturesOptions";
 
 export interface PopoutProps {
     hidden?: boolean;
@@ -8,4 +8,5 @@ export interface PopoutProps {
     children?: any;
     options?: Partial<WindowFeaturesOptions>;
     html?: string;
+    url?: string;
 }

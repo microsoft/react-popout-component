@@ -4,13 +4,13 @@
 
 This is a React component designed for React 16 with complete Typescript support.
 
-# Features
+## Features
 
 1. This is developed along side with the React 16 fix to allow mounting across frames *even for Edge and IE* browsers
 2. Typescript support for all the options (especially hard to remember window features)
 3. Reflects style-loader injected styles from the main window to the children window
 
-# Installation
+## Installation
 
 ```
 npm install react-popout-component
@@ -22,7 +22,7 @@ or
 yarn add react-popout-component
 ```
 
-# Usage
+## Usage
 
 ```
 import * as React from 'react';
@@ -55,7 +55,7 @@ export default class App extends React.Component<any, any> {
 
 ```
 
-# API
+## API
 
 PopOut Component has the following props:
 
@@ -88,7 +88,7 @@ export interface WindowFeaturesOptions {
 }
 ```
 
-# Injection Mode
+## Injection Mode
 
 This component works well for both modes of style loading:
 1. Appending Style blocks (e.g. style-loader)
@@ -108,7 +108,7 @@ window.FabricConfig = {
 }
 ```
 
-# Contributing
+## Contributing
 
 This project welcomes contributions and suggestions.  Most contributions require you to agree to a
 Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us

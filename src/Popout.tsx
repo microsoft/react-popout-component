@@ -1,101 +1,23 @@
-import * as React from "react";
-import * as ReactDOM from "react-dom";
-import { PopoutProps } from "./PopoutProps";
-import { generateWindowFeaturesString } from "./generateWindowFeaturesString";
-import { popouts } from "./popouts";
-import { crossBrowserCloneNode } from "./crossBrowserCloneNode";
-import * as globalContext from "./globalContext";
-import "./childWindowMonitor";
+import * as React from 'react';
+import * as ReactDOM from 'react-dom';
+import { PopoutProps } from './PopoutProps';
+import { generateWindowFeaturesString } from './generateWindowFeaturesString';
+import { popouts } from './popouts';
+import { crossBrowserCloneNode } from './crossBrowserCloneNode';
+import * as globalContext from './globalContext';
+import './childWindowMonitor';
 
 export class Popout extends React.Component<PopoutProps, {}> {
     private id: string;
 
-    private container: HTMLElement;
+    private container: HTMLElement | null;
 
     public styleElement: HTMLStyleElement | null;
 
     public child: Window | null;
 
-    private setupCleanupCallbacks() {
-        // Close the popout if main window is closed.
-        window.addEventListener("unload", e => this.closeChildWindowIfOpened());
-
-        globalContext.set("onChildClose", (id: string) => {
-            if (popouts[id].props.onClose) {
-                popouts[id].props.onClose!();
-            }
-        });
-
-        globalContext.set(
-            "onBeforeUnload",
-            (id: string, evt: BeforeUnloadEvent) => {
-                if (popouts[id].props.onBeforeUnload) {
-                    return popouts[id].props.onBeforeUnload!(evt);
-                }
-            }
-        );
-    }
-
-    private setupStyleElement(child: Window) {
-        this.styleElement = child.document.createElement("style");
-        this.styleElement.setAttribute("data-this-styles", "true");
-        this.styleElement.type = "text/css";
-
-        child.document.head.appendChild(this.styleElement);
-    }
-
-    private injectHtml(id: string, child: Window) {
-        let container: HTMLDivElement;
-
-        if (this.props.html) {
-            child.document.write(this.props.html);
-            const head = child.document.head;
-
-            let cssText = "";
-
-            for (let i = window.document.styleSheets.length - 1; i >= 0; i--) {
-                const rules = (window.document.styleSheets[i] as CSSStyleSheet)
-                    .cssRules;
-
-                if (rules) {
-                    for (let j = 0; j < rules.length; j++) {
-                        cssText += rules[j].cssText;
-                    }
-                }
-            }
-
-            const style = child.document.createElement("style");
-            style.innerHTML = cssText;
-
-            head.appendChild(style);
-            container = child.document.createElement("div");
-            container.id = id;
-            child.document.body.appendChild(container);
-        } else {
-            let childHtml = "<!DOCTYPE html><html><head>";
-            for (let i = window.document.styleSheets.length - 1; i >= 0; i--) {
-                const cssText = (window.document.styleSheets[
-                    i
-                ] as CSSStyleSheet).cssText;
-                childHtml += `<style>${cssText}</style>`;
-            }
-            childHtml += `</head><body><div id="${id}"></div></body></html>`;
-            child.document.write(childHtml);
-            container = child.document.getElementById(id)! as HTMLDivElement;
-        }
-
-        // Create a document with the styles of the parent window first
-        this.setupStyleElement(child);
-
-        return container;
-    }
-
-    private initializeChildWindow(id: string, child: Window) {
-        popouts[id] = this;
-
-        let container = this.injectHtml(id, child);
-
-        const unloadScriptContainer = child.document.createElement("script");
+    private setupOnCloseHandler(id: string, child: Window) {
+        const unloadScriptContainer = child.document.createElement('script');
         unloadScriptContainer.innerHTML = `
 
         window.onbeforeunload = function(e) {
@@ -119,13 +41,87 @@ export class Popout extends React.Component<PopoutProps, {}> {
         `;
 
         child.document.body.appendChild(unloadScriptContainer);
+    }
 
-        this.setupCleanupCallbacks();
+    private setupCleanupCallbacks() {
+        // Close the popout if main window is closed.
+        window.addEventListener('unload', e => this.closeChildWindowIfOpened());
 
+        globalContext.set('onChildClose', (id: string) => {
+            if (popouts[id].props.onClose) {
+                popouts[id].props.onClose!();
+            }
+        });
+
+        globalContext.set(
+            'onBeforeUnload',
+            (id: string, evt: BeforeUnloadEvent) => {
+                if (popouts[id].props.onBeforeUnload) {
+                    return popouts[id].props.onBeforeUnload!(evt);
+                }
+            }
+        );
+    }
+
+    private setupStyleElement(child: Window) {
+        this.styleElement = child.document.createElement('style');
+        this.styleElement.setAttribute('data-this-styles', 'true');
+        this.styleElement.type = 'text/css';
+
+        child.document.head.appendChild(this.styleElement);
+    }
+
+    private injectHtml(id: string, child: Window) {
+        let container: HTMLDivElement;
+
+        if (this.props.html) {
+            child.document.write(this.props.html);
+            const head = child.document.head;
+
+            let cssText = '';
+
+            for (let i = window.document.styleSheets.length - 1; i >= 0; i--) {
+                const rules = (window.document.styleSheets[i] as CSSStyleSheet)
+                    .cssRules;
+
+                if (rules) {
+                    for (let j = 0; j < rules.length; j++) {
+                        cssText += rules[j].cssText;
+                    }
+                }
+            }
+
+            const style = child.document.createElement('style');
+            style.innerHTML = cssText;
+
+            head.appendChild(style);
+            container = child.document.createElement('div');
+            container.id = id;
+            child.document.body.appendChild(container);
+        } else {
+            let childHtml = '<!DOCTYPE html><html><head>';
+            for (let i = window.document.styleSheets.length - 1; i >= 0; i--) {
+                const cssText = (window.document.styleSheets[
+                    i
+                ] as CSSStyleSheet).cssText;
+                childHtml += `<style>${cssText}</style>`;
+            }
+            childHtml += `</head><body><div id="${id}"></div></body></html>`;
+            child.document.write(childHtml);
+            container = child.document.getElementById(id)! as HTMLDivElement;
+        }
+
+        // Create a document with the styles of the parent window first
+        this.setupStyleElement(child);
+
+        return container;
+    }
+
+    private setupStyleObserver(child: Window) {
         // Add style observer for legacy style node additions
         const observer = new MutationObserver(mutations => {
             mutations.forEach(mutation => {
-                if (mutation.type == "childList") {
+                if (mutation.type == 'childList') {
                     forEachStyleElement(mutation.addedNodes, element => {
                         child.document.head.appendChild(
                             crossBrowserCloneNode(element, child.document)
@@ -138,8 +134,22 @@ export class Popout extends React.Component<PopoutProps, {}> {
         const config = { childList: true };
 
         observer.observe(document.head, config);
+    }
 
-        return container;
+    private initializeChildWindow(id: string, child: Window) {
+        popouts[id] = this;
+
+        if (!this.props.url) {
+            const container: HTMLDivElement = this.injectHtml(id, child);
+            this.setupStyleObserver(child);
+            this.setupOnCloseHandler(id, child);
+            this.setupCleanupCallbacks();
+            return container;
+        } else {
+            this.setupOnCloseHandler(id, child);
+            this.setupCleanupCallbacks();
+            return null;
+        }
     }
 
     private openChildWindow = () => {
@@ -148,15 +158,13 @@ export class Popout extends React.Component<PopoutProps, {}> {
         const name = getWindowName(this.props.name!);
 
         this.child = window.open(
-            this.props.url || "about:blank",
+            this.props.url || 'about:blank',
             name,
             options
         );
         this.id = `__${name}_container__`;
 
-        if (!this.props.url) {
-            this.container = this.initializeChildWindow(this.id, this.child!);
-        }
+        this.container = this.initializeChildWindow(this.id, this.child!);
     };
 
     private closeChildWindowIfOpened = () => {
@@ -220,7 +228,7 @@ function forEachStyleElement(
 
     for (let i = 0; i < nodeList.length; i++) {
         element = nodeList[i] as HTMLElement;
-        if (element.tagName == "STYLE") {
+        if (element.tagName == 'STYLE') {
             callback.call(scope, element, i);
         }
     }

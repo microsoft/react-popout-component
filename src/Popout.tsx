@@ -209,7 +209,10 @@ function validateUrl(url: string) {
 
     const current = window.location;
 
-    return current.host == parser.host && current.protocol == parser.protocol;
+    return (
+        (!parser.host || current.host == parser.host) &&
+        (!parser.protocol || current.protocol == parser.protocol)
+    );
 }
 
 function isChildWindowOpened(child: Window | null) {

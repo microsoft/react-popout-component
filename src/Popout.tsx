@@ -21,26 +21,22 @@ export class Popout extends React.Component<PopoutProps, {}> {
         unloadScriptContainer.innerHTML = `
 
         window.onbeforeunload = function(e) {
-            var result = window.opener.${
-                globalContext.id
-            }.onBeforeUnload.call(window, '${id}', e);
+            var result = window.opener.${globalContext.id}.onBeforeUnload.call(window, '${id}', e);
 
             if (result) {
-                window.opener.${
-                    globalContext.id
-                }.startMonitor.call(window.opener, '${id}');
+                window.opener.${globalContext.id}.startMonitor.call(window.opener, '${id}');
 
                 e.returnValue = result;
                 return result;
             } else {
-                window.opener.${
-                    globalContext.id
-                }.onChildClose.call(window.opener, '${id}');
+                window.opener.${globalContext.id}.onChildClose.call(window.opener, '${id}');
             }
         };
         `;
 
-        child.document.body.appendChild(unloadScriptContainer);
+        child.document.head.appendChild(unloadScriptContainer);
+
+        this.setupCleanupCallbacks();
     }
 
     private setupCleanupCallbacks() {
@@ -53,14 +49,11 @@ export class Popout extends React.Component<PopoutProps, {}> {
             }
         });
 
-        globalContext.set(
-            'onBeforeUnload',
-            (id: string, evt: BeforeUnloadEvent) => {
-                if (popouts[id].props.onBeforeUnload) {
-                    return popouts[id].props.onBeforeUnload!(evt);
-                }
+        globalContext.set('onBeforeUnload', (id: string, evt: BeforeUnloadEvent) => {
+            if (popouts[id].props.onBeforeUnload) {
+                return popouts[id].props.onBeforeUnload!(evt);
             }
-        );
+        });
     }
 
     private setupStyleElement(child: Window) {
@@ -81,8 +74,7 @@ export class Popout extends React.Component<PopoutProps, {}> {
             let cssText = '';
 
             for (let i = window.document.styleSheets.length - 1; i >= 0; i--) {
-                const rules = (window.document.styleSheets[i] as CSSStyleSheet)
-                    .cssRules;
+                const rules = (window.document.styleSheets[i] as CSSStyleSheet).cssRules;
 
                 if (rules) {
                     for (let j = 0; j < rules.length; j++) {
@@ -101,9 +93,7 @@ export class Popout extends React.Component<PopoutProps, {}> {
         } else {
             let childHtml = '<!DOCTYPE html><html><head>';
             for (let i = window.document.styleSheets.length - 1; i >= 0; i--) {
-                const cssText = (window.document.styleSheets[
-                    i
-                ] as CSSStyleSheet).cssText;
+                const cssText = (window.document.styleSheets[i] as CSSStyleSheet).cssText;
                 childHtml += `<style>${cssText}</style>`;
             }
             childHtml += `</head><body><div id="${id}"></div></body></html>`;
@@ -143,11 +133,15 @@ export class Popout extends React.Component<PopoutProps, {}> {
             const container: HTMLDivElement = this.injectHtml(id, child);
             this.setupStyleObserver(child);
             this.setupOnCloseHandler(id, child);
-            this.setupCleanupCallbacks();
             return container;
         } else {
-            this.setupOnCloseHandler(id, child);
-            this.setupCleanupCallbacks();
+            // For Edge, when loading a URL, the document.head won't be available until child's window.onload
+            if (window.navigator.userAgent.match(/MSIE|Edge/)) {
+                child.addEventListener('load', () => this.setupOnCloseHandler(id, child));
+            } else {
+                this.setupOnCloseHandler(id, child);
+            }
+
             return null;
         }
     }
@@ -157,11 +151,7 @@ export class Popout extends React.Component<PopoutProps, {}> {
 
         const name = getWindowName(this.props.name!);
 
-        this.child = window.open(
-            this.props.url || 'about:blank',
-            name,
-            options
-        );
+        this.child = window.open(this.props.url || 'about:blank', name, options);
         this.id = `__${name}_container__`;
 
         this.container = this.initializeChildWindow(this.id, this.child!);
@@ -178,17 +168,11 @@ export class Popout extends React.Component<PopoutProps, {}> {
         }
     };
 
-    componentDidMount() {
-        if (!this.props.hidden && !isChildWindowOpened(this.child)) {
-            this.openChildWindow();
+    private renderChildWindow() {
+        if (this.props.url && !validateUrl(this.props.url!)) {
+            throw new Error('react-popup-component error: cross origin URLs are not supported');
         }
-    }
 
-    componentWillUnmount() {
-        this.closeChildWindowIfOpened();
-    }
-
-    render() {
         if (!this.props.hidden) {
             if (!isChildWindowOpened(this.child)) {
                 this.openChildWindow();
@@ -197,13 +181,35 @@ export class Popout extends React.Component<PopoutProps, {}> {
             if (!this.props.url) {
                 ReactDOM.render(this.props.children, this.container);
             }
-
-            return null;
         } else {
             this.closeChildWindowIfOpened();
-            return null;
         }
     }
+
+    componentDidUpdate() {
+        this.renderChildWindow();
+    }
+
+    componentDidMount() {
+        this.renderChildWindow();
+    }
+
+    componentWillUnmount() {
+        this.closeChildWindowIfOpened();
+    }
+
+    render() {
+        return null;
+    }
+}
+
+function validateUrl(url: string) {
+    const parser = document.createElement('a');
+    parser.href = url;
+
+    const current = window.location;
+
+    return current.host == parser.host && current.protocol == parser.protocol;
 }
 
 function isChildWindowOpened(child: Window | null) {

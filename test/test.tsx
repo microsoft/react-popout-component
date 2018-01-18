@@ -84,30 +84,18 @@ class App extends React.Component<any, any> {
                             />
                         )}
 
-                        <button onClick={() => this.openWindow(name)}>
-                            Open {name}
-                        </button>
-                        <button onClick={() => this.closeWindow(name)}>
-                            Close {name}
-                        </button>
+                        <button onClick={() => this.openWindow(name)}>Open {name}</button>
+                        <button onClick={() => this.closeWindow(name)}>Close {name}</button>
                     </div>
                 ))}
 
                 <div>
                     {this.state.open['3'] && (
-                        <Popout
-                            name={'3'}
-                            url="test.html"
-                            onClose={() => this.onUrlClose()}
-                        />
+                        <Popout name={'3'} url="test.html" onClose={() => this.onUrlClose()} />
                     )}
 
-                    <button onClick={() => this.openWindow('3')}>
-                        Open {'3'}
-                    </button>
-                    <button onClick={() => this.closeWindow('3')}>
-                        Close {'3'}
-                    </button>
+                    <button onClick={() => this.openWindow('3')}>Open {'3'}</button>
+                    <button onClick={() => this.closeWindow('3')}>Close {'3'}</button>
                 </div>
 
                 <button onClick={() => this.changeText()}>Change Text</button>

@@ -4,27 +4,27 @@
 
 This is a React component designed for React 16 with complete Typescript support.
 
-# Features
+## Features
 
 1. This is developed along side with the React 16 fix to allow mounting across frames *even for Edge and IE* browsers
 2. Typescript support for all the options (especially hard to remember window features)
 3. Reflects style-loader injected styles from the main window to the children window
 
-# Installation
+## Installation
 
-```
+```sh
 npm install react-popout-component
 ```
 
 or
 
-```
+```sh
 yarn add react-popout-component
 ```
 
-# Usage
+## Usage
 
-```
+```tsx
 import * as React from 'react';
 import {Popout} from 'react-popout-component';
 
@@ -55,11 +55,11 @@ export default class App extends React.Component<any, any> {
 
 ```
 
-# API
+## API
 
 PopOut Component has the following props:
 
-```
+```ts
 export interface PopoutProps {
     hidden?: boolean;
     name?: string;
@@ -73,7 +73,7 @@ export interface PopoutProps {
 
 The `options` prop is of the following type:
 
-```
+```ts
 export interface WindowFeaturesOptions {
     left: number;
     top: number;
@@ -88,7 +88,7 @@ export interface WindowFeaturesOptions {
 }
 ```
 
-# Injection Mode
+## Injection Mode
 
 This component works well for both modes of style loading:
 1. Appending Style blocks (e.g. style-loader)
@@ -98,7 +98,7 @@ For the second case with insertRule(), since there is nothing that can observe t
 rule is inserted. For an example usage with the Microsoft [Office Fabric](https://github.com/officedev/office-ui-fabric-react), 
 set it up as a global like so:
 
-```javascript
+```js
 import {insertPopoutStylesheetRule} from 'react-popout-component';
 
 window.FabricConfig = {
@@ -108,7 +108,7 @@ window.FabricConfig = {
 }
 ```
 
-# Contributing
+## Contributing
 
 This project welcomes contributions and suggestions.  Most contributions require you to agree to a
 Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us

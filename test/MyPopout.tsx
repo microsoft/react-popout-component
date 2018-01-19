@@ -27,7 +27,8 @@ export default class MyPopout extends React.Component<MyPopoutProps, any> {
                 onBeforeUnload={this.props.onBeforeUnload}
                 options={{
                     resizable: true,
-                }}>
+                }}
+            >
                 <div>
                     <h1 className={className}>
                         {this.props.message} {this.props.name} {this.state.newStyle ? 'new' : 'old'}

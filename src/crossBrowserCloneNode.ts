@@ -1,7 +1,4 @@
-export function crossBrowserCloneNode(
-    element: HTMLElement,
-    targetDocument: HTMLDocument
-) {
+export function crossBrowserCloneNode(element: HTMLElement, targetDocument: HTMLDocument) {
     const cloned = targetDocument.createElement(element.tagName) as HTMLElement;
     cloned.innerHTML = element.innerHTML;
 

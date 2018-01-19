@@ -124,7 +124,7 @@ export class Popout extends React.Component<PopoutProps, {}> {
                 if (mutation.type == 'childList') {
                     forEachStyleElement(mutation.addedNodes, element => {
                         child.document.head.appendChild(
-                            crossBrowserCloneNode(element, child.document)
+                            crossBrowserCloneNode(element, child.document),
                         );
                     });
                 }
@@ -157,7 +157,7 @@ export class Popout extends React.Component<PopoutProps, {}> {
         const name = getWindowName(this.props.name!);
 
         this.child = validatePopupBlocker(
-            window.open(this.props.url || 'about:blank', name, options)
+            window.open(this.props.url || 'about:blank', name, options)!,
         );
 
         if (!this.child && this.props.onBlocked) {
@@ -250,7 +250,7 @@ function getWindowName(name: string) {
 function forEachStyleElement(
     nodeList: NodeList,
     callback: (element: HTMLElement, index?: number) => void,
-    scope?: any
+    scope?: any,
 ) {
     let element: HTMLElement;
 

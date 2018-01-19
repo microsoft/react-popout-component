@@ -18,12 +18,6 @@ class App extends React.Component<any, any> {
             },
             message: 'Hello World!',
         };
-
-        setTimeout(() => {
-            let open = this.state.open;
-            open['3'] = true;
-            this.setState({ open });
-        }, 500);
     }
 
     openWindow(id: string) {

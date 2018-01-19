@@ -136,7 +136,10 @@ export class Popout extends React.Component<PopoutProps, {}> {
             return container;
         } else {
             // For Edge, when loading a URL, the document.head won't be available until child's window.onload
-            if (window.navigator.userAgent.match(/MSIE|Edge/)) {
+            // For IE, we find that we need to use a RAF to trigger the setup so that it is done rendering the document.head
+            if (window.navigator.userAgent.match(/MSIE|Trident/)) {
+                child.requestAnimationFrame(() => this.setupOnCloseHandler(id, child));
+            } else if (window.navigator.userAgent.match(/Edge/)) {
                 child.addEventListener('load', () => this.setupOnCloseHandler(id, child));
             } else {
                 this.setupOnCloseHandler(id, child);

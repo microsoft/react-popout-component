@@ -2,7 +2,7 @@ import { popouts } from './popouts';
 import * as globalContext from './globalContext';
 
 const monitors: {
-    [id: string]: any;
+    [id: string]: number;
 } = {};
 
 const delay = 250;
@@ -15,12 +15,12 @@ function start(id: string) {
                 popouts[id].props.onClose!();
                 popouts[id].child = null;
             } else {
-                monitors[id] = setTimeout(monitor, delay);
+                monitors[id] = window.setTimeout(monitor, delay);
             }
         }
     };
 
-    monitors[id] = setTimeout(monitor, delay);
+    monitors[id] = window.setTimeout(monitor, delay);
 }
 
 function stop(id: string) {

@@ -216,7 +216,7 @@ function validateUrl(url: string) {
     const current = window.location;
 
     return (
-        (!parser.host || current.host == parser.host) &&
+        (!parser.hostname || current.hostname == parser.hostname) &&
         (!parser.protocol || current.protocol == parser.protocol)
     );
 }

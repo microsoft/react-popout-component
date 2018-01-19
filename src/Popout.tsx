@@ -45,7 +45,7 @@ export class Popout extends React.Component<PopoutProps, {}> {
             this.setupCleanupCallbacks();
         } else {
             this.setupAttempts++;
-            child.requestAnimationFrame(() => this.setupOnCloseHandler(id, child));
+            setTimeout(() => this.setupOnCloseHandler(id, child), 50);
         }
     }
 

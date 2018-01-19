@@ -12,31 +12,41 @@ export class Popout extends React.Component<PopoutProps, {}> {
 
     private container: HTMLElement | null;
 
+    private setupAttempts = 0;
+
     public styleElement: HTMLStyleElement | null;
 
     public child: Window | null;
 
     private setupOnCloseHandler(id: string, child: Window) {
-        const unloadScriptContainer = child.document.createElement('script');
-        unloadScriptContainer.innerHTML = `
+        // For Edge, IE browsers, the document.head might not exist here yet. We will just simply attempt again when RAF is called
+        if (child.document.head && this.setupAttempts < 5) {
+            const unloadScriptContainer = child.document.createElement('script');
+            unloadScriptContainer.innerHTML = `
 
-        window.onbeforeunload = function(e) {
-            var result = window.opener.${globalContext.id}.onBeforeUnload.call(window, '${id}', e);
+            window.onbeforeunload = function(e) {
+                var result = window.opener.${
+                    globalContext.id
+                }.onBeforeUnload.call(window, '${id}', e);
 
-            if (result) {
-                window.opener.${globalContext.id}.startMonitor.call(window.opener, '${id}');
+                if (result) {
+                    window.opener.${globalContext.id}.startMonitor.call(window.opener, '${id}');
 
-                e.returnValue = result;
-                return result;
-            } else {
-                window.opener.${globalContext.id}.onChildClose.call(window.opener, '${id}');
-            }
-        };
-        `;
+                    e.returnValue = result;
+                    return result;
+                } else {
+                    window.opener.${globalContext.id}.onChildClose.call(window.opener, '${id}');
+                }
+            };
+            `;
 
-        child.document.head.appendChild(unloadScriptContainer);
+            child.document.head.appendChild(unloadScriptContainer);
 
-        this.setupCleanupCallbacks();
+            this.setupCleanupCallbacks();
+        } else {
+            this.setupAttempts++;
+            child.requestAnimationFrame(() => this.setupOnCloseHandler(id, child));
+        }
     }
 
     private setupCleanupCallbacks() {
@@ -135,15 +145,7 @@ export class Popout extends React.Component<PopoutProps, {}> {
             this.setupOnCloseHandler(id, child);
             return container;
         } else {
-            // For Edge, when loading a URL, the document.head won't be available until child's window.onload
-            // For IE, we find that we need to use a RAF to trigger the setup so that it is done rendering the document.head
-            if (window.navigator.userAgent.match(/MSIE|Trident/)) {
-                child.requestAnimationFrame(() => this.setupOnCloseHandler(id, child));
-            } else if (window.navigator.userAgent.match(/Edge/)) {
-                child.addEventListener('load', () => this.setupOnCloseHandler(id, child));
-            } else {
-                this.setupOnCloseHandler(id, child);
-            }
+            this.setupOnCloseHandler(id, child);
 
             return null;
         }

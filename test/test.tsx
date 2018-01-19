@@ -18,6 +18,12 @@ class App extends React.Component<any, any> {
             },
             message: 'Hello World!',
         };
+
+        setTimeout(() => {
+            let open = this.state.open;
+            open['3'] = true;
+            this.setState({ open });
+        }, 500);
     }
 
     openWindow(id: string) {
@@ -91,7 +97,12 @@ class App extends React.Component<any, any> {
 
                 <div>
                     {this.state.open['3'] && (
-                        <Popout name={'3'} url="test.html" onClose={() => this.onUrlClose()} />
+                        <Popout
+                            name={'3'}
+                            url="test.html"
+                            onClose={() => this.onUrlClose()}
+                            onBlocked={() => console.log("you can't block me!")}
+                        />
                     )}
 
                     <button onClick={() => this.openWindow('3')}>Open {'3'}</button>

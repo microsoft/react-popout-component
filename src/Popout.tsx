@@ -151,10 +151,16 @@ export class Popout extends React.Component<PopoutProps, {}> {
 
         const name = getWindowName(this.props.name!);
 
-        this.child = window.open(this.props.url || 'about:blank', name, options);
-        this.id = `__${name}_container__`;
+        this.child = validatePopupBlocker(
+            window.open(this.props.url || 'about:blank', name, options)
+        );
 
-        this.container = this.initializeChildWindow(this.id, this.child!);
+        if (!this.child && this.props.onBlocked) {
+            this.props.onBlocked();
+        } else {
+            this.id = `__${name}_container__`;
+            this.container = this.initializeChildWindow(this.id, this.child!);
+        }
     };
 
     private closeChildWindowIfOpened = () => {
@@ -213,6 +219,14 @@ function validateUrl(url: string) {
         (!parser.host || current.host == parser.host) &&
         (!parser.protocol || current.protocol == parser.protocol)
     );
+}
+
+function validatePopupBlocker(child: Window) {
+    if (!child || child.closed || typeof child.closed == 'undefined') {
+        return null;
+    }
+
+    return child;
 }
 
 function isChildWindowOpened(child: Window | null) {

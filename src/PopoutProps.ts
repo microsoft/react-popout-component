@@ -5,6 +5,7 @@ export interface PopoutProps {
     name?: string;
     onClose?: () => void;
     onBeforeUnload?: (evt: BeforeUnloadEvent) => string | null | undefined;
+    onBlocked?: () => void;
     children?: any;
     options?: Partial<WindowFeaturesOptions>;
     html?: string;

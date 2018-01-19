@@ -1,4 +1,4 @@
-import { WindowFeaturesOptions } from './WindwoFeaturesOptions';
+import { WindowFeaturesOptions } from "./WindowFeaturesOptions";
 
 export function generateWindowFeaturesString(
     optionsProp: Partial<WindowFeaturesOptions>

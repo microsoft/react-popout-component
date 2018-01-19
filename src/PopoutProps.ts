@@ -1,4 +1,4 @@
-import { WindowFeaturesOptions } from './WindwoFeaturesOptions';
+import { WindowFeaturesOptions } from "./WindowFeaturesOptions";
 
 export interface PopoutProps {
     hidden?: boolean;

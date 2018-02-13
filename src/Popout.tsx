@@ -26,7 +26,7 @@ export class Popout extends React.Component<PopoutProps, {}> {
 
             window.onbeforeunload = function(e) {
                 var result = window.opener.${
-                    globalContext.id
+                globalContext.id
                 }.onBeforeUnload.call(window, '${id}', e);
 
                 if (result) {
@@ -84,12 +84,24 @@ export class Popout extends React.Component<PopoutProps, {}> {
             let cssText = '';
 
             for (let i = window.document.styleSheets.length - 1; i >= 0; i--) {
-                const rules = (window.document.styleSheets[i] as CSSStyleSheet).cssRules;
+                let styleSheet = (window.document.styleSheets[i] as CSSStyleSheet);
+                try {
+                    const rules = styleSheet.cssRules;
 
-                if (rules) {
-                    for (let j = 0; j < rules.length; j++) {
-                        cssText += rules[j].cssText;
+                    if (rules) {
+                        for (let j = 0; j < rules.length; j++) {
+                            cssText += rules[j].cssText;
+                        }
                     }
+                } catch {
+                    // We're primarily looking for a security exception here.
+                    // See https://bugs.chromium.org/p/chromium/issues/detail?id=775525
+                    // Try to just embed the style element instead.
+                    let styleElement = child.document.createElement('link');
+                    styleElement.type = styleSheet.type;
+                    styleElement.rel = 'stylesheet';
+                    styleElement.href = styleSheet.href;
+                    head.appendChild(styleElement);
                 }
             }
 

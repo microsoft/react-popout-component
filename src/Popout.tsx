@@ -82,17 +82,12 @@ export class Popout extends React.Component<PopoutProps, {}> {
             const head = child.document.head;
 
             let cssText = '';
+            let rules = null;
 
             for (let i = window.document.styleSheets.length - 1; i >= 0; i--) {
-                let styleSheet = (window.document.styleSheets[i] as CSSStyleSheet);
+                let styleSheet = window.document.styleSheets[i] as CSSStyleSheet;
                 try {
-                    const rules = styleSheet.cssRules;
-
-                    if (rules) {
-                        for (let j = 0; j < rules.length; j++) {
-                            cssText += rules[j].cssText;
-                        }
-                    }
+                    rules = styleSheet.cssRules;
                 } catch {
                     // We're primarily looking for a security exception here.
                     // See https://bugs.chromium.org/p/chromium/issues/detail?id=775525
@@ -102,7 +97,20 @@ export class Popout extends React.Component<PopoutProps, {}> {
                     styleElement.rel = 'stylesheet';
                     styleElement.href = styleSheet.href;
                     head.appendChild(styleElement);
+                } finally {
+                    if (rules) {
+                        for (let j = 0; j < rules.length; j++) {
+                            try {
+                                cssText += rules[j].cssText;
+                            } catch {
+                                // IE11 will throw a security exception sometimes when accessing cssText.
+                                // There's no good way to detect this, so we capture the exception instead.
+                            }
+                        }
+                    }
                 }
+
+                rules = null;
             }
 
             const style = child.document.createElement('style');
@@ -115,8 +123,14 @@ export class Popout extends React.Component<PopoutProps, {}> {
         } else {
             let childHtml = '<!DOCTYPE html><html><head>';
             for (let i = window.document.styleSheets.length - 1; i >= 0; i--) {
-                const cssText = (window.document.styleSheets[i] as CSSStyleSheet).cssText;
-                childHtml += `<style>${cssText}</style>`;
+                let styleSheet = window.document.styleSheets[i] as CSSStyleSheet;
+                try {
+                    const cssText = styleSheet.cssText;
+                    childHtml += `<style>${cssText}</style>`;
+                } catch {
+                    // IE11 will throw a security exception sometimes when accessing cssText.
+                    // There's no good way to detect this, so we capture the exception instead.
+                }
             }
             childHtml += `</head><body><div id="${id}"></div></body></html>`;
             child.document.write(childHtml);

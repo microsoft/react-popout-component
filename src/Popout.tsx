@@ -186,8 +186,11 @@ export class Popout extends React.Component<PopoutProps, {}> {
             window.open(this.props.url || 'about:blank', name, options)
         );
 
-        if (!this.child && this.props.onBlocked) {
-            this.props.onBlocked();
+        if (!this.child) {
+            if (this.props.onBlocked) {
+                this.props.onBlocked();
+            }
+            this.container = null;
         } else {
             this.id = `__${name}_container__`;
             this.container = this.initializeChildWindow(this.id, this.child!);
@@ -215,7 +218,7 @@ export class Popout extends React.Component<PopoutProps, {}> {
                 this.openChildWindow();
             }
 
-            if (!this.props.url) {
+            if (!this.props.url && this.container) {
                 ReactDOM.render(this.props.children, this.container);
             }
         } else {
@@ -253,7 +256,7 @@ function validateUrl(url: string) {
 }
 
 function validatePopupBlocker(child: Window) {
-    if (!child || child.closed || typeof child.closed == 'undefined') {
+    if (!child || child.closed || typeof child == 'undefined' || typeof child.closed == 'undefined') {
         return null;
     }
 

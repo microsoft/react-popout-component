@@ -20,13 +20,18 @@ export class Popout extends React.Component<PopoutProps, {}> {
 
     private setupOnCloseHandler(id: string, child: Window) {
         // For Edge, IE browsers, the document.head might not exist here yet. We will just simply attempt again when RAF is called
-        if (child.document.head && this.setupAttempts < 5) {
+        // For Firefox, on the setTimeout, the child window might actually be set to null after the first attempt if there is a popup blocker
+        if (this.setupAttempts >= 5) {
+            return;
+        }
+
+        if (child && child.document && child.document.head) {
             const unloadScriptContainer = child.document.createElement('script');
             unloadScriptContainer.innerHTML = `
 
             window.onbeforeunload = function(e) {
                 var result = window.opener.${
-                globalContext.id
+                    globalContext.id
                 }.onBeforeUnload.call(window, '${id}', e);
 
                 if (result) {
@@ -256,7 +261,12 @@ function validateUrl(url: string) {
 }
 
 function validatePopupBlocker(child: Window) {
-    if (!child || child.closed || typeof child == 'undefined' || typeof child.closed == 'undefined') {
+    if (
+        !child ||
+        child.closed ||
+        typeof child == 'undefined' ||
+        typeof child.closed == 'undefined'
+    ) {
         return null;
     }
 

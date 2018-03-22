@@ -21,7 +21,11 @@ export class Popout extends React.Component<PopoutProps, {}> {
     private setupOnCloseHandler(id: string, child: Window) {
         // For Edge, IE browsers, the document.head might not exist here yet. We will just simply attempt again when RAF is called
         // For Firefox, on the setTimeout, the child window might actually be set to null after the first attempt if there is a popup blocker
-        if (child && child.document && child.document.head && this.setupAttempts < 5) {
+        if (this.setupAttempts >= 5) {
+            return;
+        }
+
+        if (child && child.document && child.document.head) {
             const unloadScriptContainer = child.document.createElement('script');
             unloadScriptContainer.innerHTML = `
 

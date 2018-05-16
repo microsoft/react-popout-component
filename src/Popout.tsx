@@ -27,8 +27,7 @@ export class Popout extends React.Component<PopoutProps, {}> {
 
         if (child && child.document && child.document.head) {
             const unloadScriptContainer = child.document.createElement('script');
-            unloadScriptContainer.innerHTML = `
-
+            const onBeforeUnloadLogic = `
             window.onbeforeunload = function(e) {
                 var result = window.opener.${
                     globalContext.id
@@ -42,8 +41,20 @@ export class Popout extends React.Component<PopoutProps, {}> {
                 } else {
                     window.opener.${globalContext.id}.onChildClose.call(window.opener, '${id}');
                 }
+            }`;
+            unloadScriptContainer.innerHTML =
+                `
+            window.onload = function(e) {
+                ` +
+                onBeforeUnloadLogic +
+                `
             };
             `;
+
+            // For edge and IE, they don't actually execute the onload logic, so we just want the onBeforeUnload logic.
+            if (isBrowserIEOrEdge()) {
+                unloadScriptContainer.innerHTML = onBeforeUnloadLogic;
+            }
 
             child.document.head.appendChild(unloadScriptContainer);
 
@@ -299,4 +310,10 @@ function forEachStyleElement(
             callback.call(scope, element, i);
         }
     }
+}
+
+function isBrowserIEOrEdge() {
+    const userAgent =
+        typeof navigator != 'undefined' && navigator.userAgent ? navigator.userAgent : '';
+    return /Edge/.test(userAgent) || /Trident/.test(userAgent);
 }

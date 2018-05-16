@@ -52,7 +52,8 @@ export class Popout extends React.Component<PopoutProps, {}> {
             `;
 
             // For edge and IE, they don't actually execute the onload logic, so we just want the onBeforeUnload logic.
-            if (isBrowserIEOrEdge()) {
+            // If this isn't a URL scenario, we have to bind onBeforeUnload directly too.
+            if (isBrowserIEOrEdge() || !this.props.url) {
                 unloadScriptContainer.innerHTML = onBeforeUnloadLogic;
             }
 

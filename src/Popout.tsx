@@ -42,6 +42,9 @@ export class Popout extends React.Component<PopoutProps, {}> {
                     window.opener.${globalContext.id}.onChildClose.call(window.opener, '${id}');
                 }
             }`;
+
+            // Use onload for most URL scenarios to allow time for the page to laod first
+            // Safari 11.1 is aggressive, so it will call onbeforeunload prior to the page being created.
             unloadScriptContainer.innerHTML =
                 `
             window.onload = function(e) {

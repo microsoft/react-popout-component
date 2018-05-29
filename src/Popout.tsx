@@ -273,11 +273,9 @@ function validateUrl(url: string) {
         (parser.protocol && current.protocol != parser.protocol)
     ) {
         throw new Error(
-            `react-popup-component error: cross origin URLs are not supported (current.hostname=${
-                current.hostname
-            }; parser.hostname=${parser.hostname}; current.protocol=${
+            `react-popup-component error: cross origin URLs are not supported (window=${
                 current.protocol
-            }; parser.protocol=${parser.protocol}; )`
+            }//${current.hostname}; popout=${parser.protocol}//${parser.hostname})`
         );
     }
 }

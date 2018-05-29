@@ -226,9 +226,7 @@ export class Popout extends React.Component<PopoutProps, {}> {
     };
 
     private renderChildWindow() {
-        if (this.props.url && !validateUrl(this.props.url!)) {
-            throw new Error('react-popup-component error: cross origin URLs are not supported');
-        }
+        validateUrl(this.props.url!);
 
         if (!this.props.hidden) {
             if (!isChildWindowOpened(this.child)) {
@@ -261,15 +259,27 @@ export class Popout extends React.Component<PopoutProps, {}> {
 }
 
 function validateUrl(url: string) {
+    if (!url) {
+        return;
+    }
+
     const parser = document.createElement('a');
     parser.href = url;
 
     const current = window.location;
 
-    return (
-        (!parser.hostname || current.hostname == parser.hostname) &&
-        (!parser.protocol || current.protocol == parser.protocol)
-    );
+    if (
+        (parser.hostname && current.hostname != parser.hostname) ||
+        (parser.protocol && current.protocol != parser.protocol)
+    ) {
+        throw new Error(
+            `react-popup-component error: cross origin URLs are not supported (current.hostname=${
+                current.hostname
+            }; parser.hostname=${parser.hostname}; current.protocol=${
+                current.protocol
+            }; parser.protocol=${parser.protocol}; )`
+        );
+    }
 }
 
 function validatePopupBlocker(child: Window) {

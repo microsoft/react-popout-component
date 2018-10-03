@@ -4,6 +4,8 @@
 
 This is a React component designed for React 16 with complete Typescript support.
 
+![Example](example.png)
+
 ## Features
 
 1. This is developed along side with the React 16 fix to allow mounting across frames *even for Edge and IE* browsers

@@ -8,15 +8,15 @@ import * as globalContext from './globalContext';
 import './childWindowMonitor';
 
 export class Popout extends React.Component<PopoutProps, {}> {
-    private id: string;
+    private id: string = '';
 
-    private container: HTMLElement | null;
+    private container: HTMLElement | null = null;
 
     private setupAttempts = 0;
 
-    public styleElement: HTMLStyleElement | null;
+    public styleElement: HTMLStyleElement | null = null;
 
-    public child: Window | null;
+    public child: Window | null = null;
 
     private setupOnCloseHandler(id: string, child: Window) {
         // For Edge, IE browsers, the document.head might not exist here yet. We will just simply attempt again when RAF is called
@@ -112,7 +112,7 @@ export class Popout extends React.Component<PopoutProps, {}> {
                     let styleElement = child.document.createElement('link');
                     styleElement.type = styleSheet.type;
                     styleElement.rel = 'stylesheet';
-                    styleElement.href = styleSheet.href;
+                    styleElement.href = styleSheet.href || '';
                     head.appendChild(styleElement);
                 } finally {
                     if (rules) {
@@ -280,7 +280,7 @@ function validateUrl(url: string) {
     }
 }
 
-function validatePopupBlocker(child: Window) {
+function validatePopupBlocker(child: Window | null) {
     if (
         !child ||
         child.closed ||

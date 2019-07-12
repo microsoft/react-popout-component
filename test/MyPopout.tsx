@@ -19,6 +19,7 @@ export default class MyPopout extends React.Component<MyPopoutProps, any> {
 
         return (
             <Popout
+                title={this.props.title}
                 hidden={this.props.hidden}
                 html={`<!DOCTYPE html><html dir='ltr'><body class='${
                     styles.popout

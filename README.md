@@ -62,7 +62,8 @@ PopOut Component has the following props:
 ```ts
 export interface PopoutProps {
     hidden?: boolean;
-    name?: string;
+    name?: string;  // refers to the window.name attribute
+    title?: string; // refers to the document.title attribute (use this to give your new window's title bar a proper name!)
     onClose?: () => void;
     onBeforeUnload?: (evt: BeforeUnloadEvent) => string | null | undefined;
     children?: any;
